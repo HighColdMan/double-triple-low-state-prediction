@@ -1,15 +1,107 @@
 import pandas as pd
 import os
 import streamlit as st
+import matplotlib.pyplot as plt
 from models import mymodel
 import numpy as np
 import torch
 import joblib
 from utils import function as fc
 
+
 st.title("EEEE")
 st.title('Deep Learning Models of Double-Triple Low-state Prediction')  # 算法名称 and XXX
 
+
+
+
+def show_paper_result():
+
+    st.header("Results of the classification model based on input Model 1")
+    st.subheader("The time window is 5")
+    # window 5
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.image("image/classificaiton/window_5/Model 1 5min confusion_plot.png", caption="Model 1 5min confusion", use_container_width=True)
+    with col2:
+        st.image("image/classificaiton/window_5/Model 1 10min confusion_plot.png", caption="Model 1 10min confusion", use_container_width=True)
+    with col3:
+        st.image("image/classificaiton/window_5/Model 1 15min confusion_plot.png", caption="Model 1 15min confusion", use_container_width=True)
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.image("image/classificaiton/window_5/Model 1 5min roc.png", caption="Model 1 5min Roc", use_container_width=True)
+    with col2:
+        st.image("image/classificaiton/window_5/Model 1 10min roc.png", caption="Model 1 10min roc", use_container_width=True)
+    with col3:
+        st.image("image/classificaiton/window_5/Model 1 15min roc.png", caption="Model 1 15min roc", use_container_width=True)
+    # window 10
+    st.subheader("The time window is 10")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.image("image/classificaiton/window_10/Model 1 5min confusion_plot.png", caption="Model 1 5min confusion", use_container_width=True)
+    with col2:
+        st.image("image/classificaiton/window_10/Model 1 10min confusion_plot.png", caption="Model 1 10min confusion", use_container_width=True)
+    with col3:
+        st.image("image/classificaiton/window_10/Model 1 15min confusion_plot.png", caption="Model 1 15min confusion", use_container_width=True)
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.image("image/classificaiton/window_10/Model 1 5min roc.png", caption="Model 1 5min Roc", use_container_width=True)
+    with col2:
+        st.image("image/classificaiton/window_10/Model 1 10min roc.png", caption="Model 1 10min roc", use_container_width=True)
+    with col3:
+        st.image("image/classificaiton/window_10/Model 1 15min roc.png", caption="Model 1 15min roc", use_container_width=True)
+    # window 15
+    st.subheader("The time window is 15")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.image("image/classificaiton/window_15/Model 1 5min confusion_plot.png", caption="Model 1 5min confusion", use_container_width=True)
+    with col2:
+        st.image("image/classificaiton/window_15/Model 1 10min confusion_plot.png", caption="Model 1 10min confusion", use_container_width=True)
+    with col3:
+        st.image("image/classificaiton/window_15/Model 1 15min confusion_plot.png", caption="Model 1 15min confusion", use_container_width=True)
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.image("image/classificaiton/window_15/Model 1 5min roc.png", caption="Model 1 5min Roc", use_container_width=True)
+    with col2:
+        st.image("image/classificaiton/window_15/Model 1 10min roc.png", caption="Model 1 10min roc", use_container_width=True)
+    with col3:
+        st.image("image/classificaiton/window_15/Model 1 15min roc.png", caption="Model 1 15min roc", use_container_width=True)
+    
+    st.subheader("The precision, recall, and F1 score performance of classification model")
+    df = pd.read_csv('result/classification.csv', index_col=0)
+    st.table(df)
+
+    
+    # Regression model result
+    st.header("Results of the regression model based on input Model 1")
+    st.subheader("winow 5 boxdata")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.image("image/regression/window_5/5min triple-low state predictionbox.png", caption="Model 1 5min boxdata", use_container_width=True)
+    with col2:
+        st.image("image/regression/window_5/10min triple-low state predictionbox.png", caption="Model 1 10min boxdata", use_container_width=True)
+    with col3:
+        st.image("image/regression/window_5/15min triple-low state predictionbox.png", caption="Model 1 15min boxdata", use_container_width=True)
+    st.subheader("winow 10 boxdata")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.image("image/regression/window_10/5min triple-low state predictionbox.png", caption="Model 1 5min boxdata", use_container_width=True)
+    with col2:
+        st.image("image/regression/window_10/10min triple-low state predictionbox.png", caption="Model 1 10min boxdata", use_container_width=True)
+    with col3:
+        st.image("image/regression/window_10/15min triple-low state predictionbox.png", caption="Model 1 15min boxdata", use_container_width=True)
+    st.subheader("winow 15 boxdata")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.image("image/regression/window_15/5min triple-low state predictionbox.png", caption="Model 1 5min boxdata", use_container_width=True)
+    with col2:
+        st.image("image/regression/window_15/10min triple-low state predictionbox.png", caption="Model 1 10min boxdata", use_container_width=True)
+    with col3:
+        st.image("image/regression/window_15/15min triple-low state predictionbox.png", caption="Model 1 15min boxdata", use_container_width=True)
+
+    st.subheader("The accuracy, mean absolute error (MAE), and intra class correlation of different regression models")
+    df2 = pd.read_csv("result/regression.csv", index_col=0)
+    st.table(df2)
 
 
 def data_input():
