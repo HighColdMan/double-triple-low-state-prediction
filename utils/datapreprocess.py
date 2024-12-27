@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import torch.nn.functional as ff
 import torch
-from resources import function as fc
+from utils import function as fc
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 import re
