@@ -1,0 +1,13 @@
+Model1, 5 min prediction, 10 min prediction, 15 min prediction
+window 5,,,
+Accurary, 0.749, 0.713, 0.709
+MAE, 4.365, 4.919, 5.042
+ICC, 0.463, 0.508, 0.509
+window 10
+Accurary, 0.758, 0.726, 0.719
+MAE, 4.221, 4.722, 4.869
+ICC, 0.487, 0.527, 0.534
+window 15
+Accurary, 0.752, 0.730, 0.724
+MAE, 4.187, 4.673, 4.778
+ICC, 0.503, 0.539, 0.541
