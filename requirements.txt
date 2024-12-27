@@ -5,3 +5,4 @@ torchvision
 torchaudio
 joblib
 sklearn
+pip
