@@ -12,8 +12,6 @@ st.title("EEEE")
 st.title('Deep Learning Models of Double-Triple Low-state Prediction')  # 算法名称 and XXX
 
 
-
-
 def show_paper_result():
 
     st.header("Results of the classification model based on input Model 1")
@@ -139,28 +137,6 @@ def data_input():
 
     return win, filled_df
 
-    # # 提交按钮
-    # if st.button("Submit"):
-    #     st.success("Data submitted successfully!")
-    #     st.write("Submitted Data:")
-    #     st.write(filled_df)
-
-    # st.title("Fill the Table")
-    #     st.subheader(f'请输入{min}分钟的连续数据')
-    #     for i in range(min):
-    #         st.markdown(f"请输入第{i+1}分钟的数据")
-    #         cols1, cols2, cols3 = st.columns(3)
-    #         with cols1:
-    #             ART_MBP = st.slider("ART_MBP", 0, 500)
-    #         with cols2:
-    #             MAC = st.slider("MAC", 0, 5)
-    #         with cols3:
-    #             BIS = st.slider("BIS", 0, 100)
-            
-    #         inp.append(BIS)
-    
-    # return inp
-
 def process_classification(win, inp):
     min_list = [5, 10, 15]
     train_x = []
@@ -209,7 +185,10 @@ def process_regression(win, inp):
         net.load_state_dict(ckpt)
         net.eval()
         output = net(train_x).detach().numpy()
-        output = mm.inverse_transform(output)[:, :3]
+        output = mm.inverse_transform(output)[:, :3].reshape(-1)
+        output[0] = output[0].astype(int)
+        output[2] = output[2].astype(int)
+        output[1] = np.around(output[1], 1)
         pred.append(int("".join(map(str, fc.getClass(output)))))
   
     return pred
@@ -233,10 +212,7 @@ if __name__ == "__main__":
     if btn_reg:
         r = process_regression(win, inp)
         for i, min in enumerate([5, 10, 15]):
-            st.markdown(f"连续{win}分钟输入的回归模型预测{min}分钟后最可能发生的结果为：Situation {r[i]+1}")
-
-
-    # do_processing()
-    # setup_selectors()
+            # st.markdown(f"连续{win}分钟输入的回归模型预测{min}分钟后最可能发生的结果为：Situation {r[i]+1}")
+            st.markdown(f"连续{win}分钟输入的回归模型预测{min}分钟的结果为-ART_MBP:{r[i][0]}-MAC:{r[i][1]:.1f}-BIS:{r[i][2]}")
 
             
