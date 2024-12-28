@@ -189,7 +189,8 @@ def process_regression(win, inp):
         output[0] = output[0].astype(int)
         output[2] = output[2].astype(int)
         output[1] = np.around(output[1], 1)
-        pred.append(int("".join(map(str, fc.getClass(output)))))
+        # pred.append(int("".join(map(str, fc.getClass(output)))))
+        pred.append(output)
   
     return pred
 
