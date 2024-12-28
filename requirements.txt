@@ -4,5 +4,5 @@ torch
 torchvision
 torchaudio
 joblib
-sklearn
+scikit-learn
 pip
