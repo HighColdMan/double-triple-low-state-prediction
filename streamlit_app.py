@@ -214,6 +214,6 @@ if __name__ == "__main__":
         r = process_regression(win, inp)
         for i, min in enumerate([5, 10, 15]):
             # st.markdown(f"连续{win}分钟输入的回归模型预测{min}分钟后最可能发生的结果为：Situation {r[i]+1}")
-            st.markdown(f"连续{win}分钟输入的回归模型预测{min}分钟的结果为-ART_MBP:{r[i][0]:0f}-MAC:{r[i][1]:.1f}-BIS:{r[i][2]:0f}")
+            st.markdown(f"连续{win}分钟输入的回归模型预测{min}分钟的结果为-ART_MBP:{r[i][0]}-MAC:{r[i][1]:.1f}-BIS:{r[i][2]}")
 
             
