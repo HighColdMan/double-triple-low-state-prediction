@@ -102,7 +102,7 @@ def show_paper_result():
 
 
 def data_input():
-    st.subheader("请选择输入连续多少分钟的数据")
+    st.subheader("Please select how many minutes of continuous data to enter!")
     win = st.radio("window", [5, 10, 15])
 
     columns = ["ART_MBP", "MAC", "BIS"]
@@ -118,7 +118,7 @@ def data_input():
         row_data = []
         cols = st.columns(len(columns)) 
         for j, col in enumerate(columns):
-            with cols[j]:  # 在对应列中创建输入框
+            with cols[j]:  # Create an input box in the corresponding column
                 value = st.text_input(f"{col} (Time: min {i + 1})", key=f"{col}_{i}")
                 row_data.append(value)
         updated_data.append(row_data)
@@ -158,7 +158,7 @@ def process_classification(win, inp):
         output = net(train_x)
         # print(f'min {min} output: {output}')
         pred.append(torch.argmax(output))
-    # print(f'分类模型输出：{pred}')
+    # print(f'Classification model output：{pred}')
     return pred
 
 
@@ -203,17 +203,17 @@ if __name__ == "__main__":
     win, inp = data_input()
 
 
-    btn_cls = st.button('分类模型预测')
-    btn_reg = st.button('回归模型预测')
+    btn_cls = st.button('Classification model prediction')
+    btn_reg = st.button('Regression model prediction')
 
     if btn_cls:
         p = process_classification(win, inp)
         for i, min in enumerate([5, 10, 15]):
-            st.markdown(f"连续{win}分钟输入的分类模型预测{min}分钟后最可能发生的结果为：Situation {p[i]+1}")
+            st.markdown(f"The classification model for{win} minutes of continuous input predicts that the most likely outcome in {min} minutes is: Situation{p[i]+1}")
     if btn_reg:
         r = process_regression(win, inp)
         for i, min in enumerate([5, 10, 15]):
             # st.markdown(f"连续{win}分钟输入的回归模型预测{min}分钟后最可能发生的结果为：Situation {r[i]+1}")
-            st.markdown(f"连续{win}分钟输入的回归模型预测{min}分钟的结果为-ART_MBP:{r[i][0]}-MAC:{r[i][1]:.1f}-BIS:{r[i][2]}")
+            st.markdown(f"The regression model for {win} minutes of continuous input predicts the result for {min} minutes as --ART_MBP:{r[i][0]} --MAC:{r[i][1]:.1f} --BIS:{r[i][2]}")
 
             
