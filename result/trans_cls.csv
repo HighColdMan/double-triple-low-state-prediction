@@ -1,0 +1,13 @@
+Model 1, 5 min prediction, 10 min prediction, 15 min prediction
+window 5,,,
+weighted-precision, 0.756, 0.704, 0.679
+weighted-recall, 0.773, 0.741, 0.732
+weighted-F1, 0.759, 0.697, 0.667
+window 10,,,
+weighted-precision, 0.7599, 0.717, 0.702
+weighted-recall, 0.777, 0.749, 0.702
+weighted-F1, 0.757, 0.701, 0.743
+window 15,,,
+weighted-precision, 0.763, 0.727, 0.708
+weighted-recall, 0.781, 0.757, 0.745
+weighted-F1, 0.756, 0.724, 0.702
