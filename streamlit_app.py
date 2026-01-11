@@ -568,16 +568,16 @@ if __name__ == "__main__":
         r = process_xgboost_res(win, inp)
         for i, min in enumerate([5, 10, 15]):
             # st.markdown(f"连续{win}分钟输入的回归模型预测{min}分钟后最可能发生的结果为：Situation {r[i]+1}")
-            st.markdown(f"The regression model for {win} minutes of continuous input predicts the result for {min} minutes as --ART_MBP:{r[i][0]} --MAC:{r[i][1]:.1f} --BIS:{r[i][2]}")
+            st.markdown(f"The xgboost regression model for {win} minutes of continuous input predicts the result for {min} minutes as --ART_MBP:{r[i][0]} --MAC:{r[i][1]:.1f} --BIS:{r[i][2]}")
                         
     if btn_transcls:
         p = process_trans_cls(win, inp)
         for i, min in enumerate([5, 10, 15]):
-            st.markdown(f"The xgboost classification model for {win} minutes of continuous input predicts that the most likely outcome in {min} minutes is: Situation{p[i]+1}")
+            st.markdown(f"The trans classification model for {win} minutes of continuous input predicts that the most likely outcome in {min} minutes is: Situation{p[i]+1}")
 
     if btn_transreg:
         r = process_trans_res(win, inp)
         for i, min in enumerate([5, 10, 15]):
             # st.markdown(f"连续{win}分钟输入的回归模型预测{min}分钟后最可能发生的结果为：Situation {r[i]+1}")
-            st.markdown(f"The regression model for {win} minutes of continuous input predicts the result for {min} minutes as --ART_MBP:{r[i][0]} --MAC:{r[i][1]:.1f} --BIS:{r[i][2]}")
+            st.markdown(f"The trans regression model for {win} minutes of continuous input predicts the result for {min} minutes as --ART_MBP:{r[i][0]} --MAC:{r[i][1]:.1f} --BIS:{r[i][2]}")
                
