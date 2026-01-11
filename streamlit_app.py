@@ -6,6 +6,9 @@ import numpy as np
 import torch
 import joblib
 from utils import function as fc
+import xgboost as xgb
+from models.mymodel import MS_CNN_Transformer
+
 
 st.title('Deep Learning Models of Double-Triple Low-state Prediction')
 
@@ -345,8 +348,6 @@ def process_classification(win, inp):
 
 def process_regression(win, inp):
     min_list = [5, 10, 15]
-
-
     pred = []
     ckpt_path = os.path.join('checkpoint', f'regression-{win}')
     for min in min_list:
@@ -375,6 +376,160 @@ def process_regression(win, inp):
   
     return pred
 
+def process_xgboost_cls(win, inp):
+    min_list = [5, 10, 15]
+    pred = []
+    prob = []
+    x = inp.iloc[:].values.astype(np.float32)
+    x = x.reshape(1, -1)
+
+    for t in min_list:
+        model_path = os.path.join(
+            'checkpoint',
+            f'xgboost-cls-{win}',
+            f'{t}min',
+            'xgboost_clsmodel_fold1.json'
+        )
+    
+        cls_model = xgb.XGBClassifier(
+            n_estimators=100,
+            max_depth=2,
+            learning_rate=0.01,
+            subsample=0.6,
+            colsample_bytree=0.6,
+            random_state=42,
+            use_label_encoder=False,
+            eval_metric='mlogloss'
+        )
+        cls_model.load_model(model_path)
+
+        y_prob = cls_model.predict_proba(x)      # shape: (1, 5)
+        y_pred = np.argmax(y_prob, axis=1)[0]   # scalar
+
+        pred.append(int(y_pred))
+        prob.append(y_prob.flatten())
+
+    return pred
+
+def process_xgboost_res(win, inp):
+    min_list = [5, 10, 15]
+    pred = []
+    x = inp.iloc[:].values.astype(np.float32)
+    x = x.reshape(1, -1)
+
+    for t in min_list:
+        # scaler（和训练一致）
+        scaler = joblib.load(
+            os.path.join('dataset', f'scaler_win{t}.pkl')
+        )
+
+        # 反归一化用
+        reg_outputs = []
+
+        for i in range(3):  # MBP / MAC / BIS
+            model_path = os.path.join(
+                'checkpoint',
+                f'xgboost-res-{win}',
+                f'{t}min',
+                f'xgboost_regmodel{i}_fold1.json'
+            )
+
+            reg_model = xgb.XGBRegressor()
+            reg_model.load_model(model_path)
+
+            y = reg_model.predict(x)
+            reg_outputs.append(y[0])
+
+        reg_outputs = np.array(reg_outputs).reshape(1, -1)
+        reg_outputs = scaler.inverse_transform(reg_outputs).reshape(-1)
+
+        # 格式与 process_regression 对齐
+        reg_outputs[0] = int(reg_outputs[0])
+        reg_outputs[2] = int(reg_outputs[2])
+        reg_outputs[1] = np.round(reg_outputs[1], 1)
+
+        pred.append(reg_outputs)
+
+    return pred
+
+
+def process_trans_cls(win, inp):
+
+    min_list = [5, 10, 15]
+    pred = []
+
+    # (seq_len, C) → (1, seq_len, C)
+    x = inp.iloc[:].values.astype(np.float32)
+    x = torch.from_numpy(x).unsqueeze(0)
+
+    for t in min_list:
+        ckpt_path = os.path.join(
+            'checkpoint',
+            f'trans-cls-{win}',
+            f'{t}min',
+            'best_fold1.pth'
+        )
+
+        net = MS_CNN_Transformer(
+            input_dim=x.shape[2],
+            num_outputs_reg=3,
+            num_outputs_cls=5
+        )
+
+        state = torch.load(ckpt_path, map_location='cpu')
+        net.load_state_dict(state)
+        net.eval()
+
+        with torch.no_grad():
+            _, cls_out = net(x)
+            y_pred = torch.argmax(cls_out, dim=1).item()
+
+        pred.append(y_pred)
+
+    return pred
+    
+def process_trans_res(win, inp):
+    min_list = [5, 10, 15]
+    pred = []
+
+    x = inp.iloc[:].values.astype(np.float32)
+    x = torch.from_numpy(x).unsqueeze(0)
+
+    for t in min_list:
+        scaler = joblib.load(
+            os.path.join('dataset', f'scaler_win{t}.pkl')
+        )
+
+        ckpt_path = os.path.join(
+            'checkpoint',
+            f'trans-res-{win}',
+            f'{t}min',
+            'best_fold1.pth'
+        )
+
+        net = MS_CNN_Transformer(
+            input_dim=x.shape[2],
+            num_outputs_reg=3,
+            num_outputs_cls=5
+        )
+
+        state = torch.load(ckpt_path, map_location='cpu')
+        net.load_state_dict(state)
+        net.eval()
+
+        with torch.no_grad():
+            reg_out, _ = net(x)
+            reg_out = reg_out.numpy()
+
+        reg_out = scaler.inverse_transform(reg_out).reshape(-1)
+
+        reg_out[0] = int(reg_out[0])
+        reg_out[2] = int(reg_out[2])
+        reg_out[1] = np.round(reg_out[1], 1)
+
+        pred.append(reg_out)
+
+    return pred
 
 if __name__ == "__main__":
 
@@ -387,14 +542,42 @@ if __name__ == "__main__":
     btn_cls = st.button('Classification model prediction')
     btn_reg = st.button('Regression model prediction')
 
+    btn_xgboostcls = st.button('XGBoost Classification model prediction')
+    btn_xgboostreg = st.button('XGBoost Regression model prediction')
+
+    btn_transcls = st.button('Transformer Classification model prediction')
+    btn_transreg = st.button('Transformer Regression model prediction')
+
+
     if btn_cls:
         p = process_classification(win, inp)
         for i, min in enumerate([5, 10, 15]):
-            st.markdown(f"The classification model for{win} minutes of continuous input predicts that the most likely outcome in {min} minutes is: Situation{p[i]+1}")
+            st.markdown(f"The classification model for {win} minutes of continuous input predicts that the most likely outcome in {min} minutes is: Situation{p[i]+1}")
     if btn_reg:
         r = process_regression(win, inp)
         for i, min in enumerate([5, 10, 15]):
             # st.markdown(f"连续{win}分钟输入的回归模型预测{min}分钟后最可能发生的结果为：Situation {r[i]+1}")
             st.markdown(f"The regression model for {win} minutes of continuous input predicts the result for {min} minutes as --ART_MBP:{r[i][0]} --MAC:{r[i][1]:.1f} --BIS:{r[i][2]}")
 
-            
+    if btn_xgboostcls:
+        p = process_xgboost_cls(win, inp)
+        for i, min in enumerate([5, 10, 15]):
+            st.markdown(f"The xgboost classification model for {win} minutes of continuous input predicts that the most likely outcome in {min} minutes is: Situation{p[i]+1}")
+
+    if btn_xgboostreg:
+        r = process_xgboost_res(win, inp)
+        for i, min in enumerate([5, 10, 15]):
+            # st.markdown(f"连续{win}分钟输入的回归模型预测{min}分钟后最可能发生的结果为：Situation {r[i]+1}")
+            st.markdown(f"The regression model for {win} minutes of continuous input predicts the result for {min} minutes as --ART_MBP:{r[i][0]} --MAC:{r[i][1]:.1f} --BIS:{r[i][2]}")
+                        
+    if btn_transcls:
+        p = process_trans_cls(win, inp)
+        for i, min in enumerate([5, 10, 15]):
+            st.markdown(f"The xgboost classification model for {win} minutes of continuous input predicts that the most likely outcome in {min} minutes is: Situation{p[i]+1}")
+
+    if btn_transreg:
+        r = process_trans_res(win, inp)
+        for i, min in enumerate([5, 10, 15]):
+            # st.markdown(f"连续{win}分钟输入的回归模型预测{min}分钟后最可能发生的结果为：Situation {r[i]+1}")
+            st.markdown(f"The regression model for {win} minutes of continuous input predicts the result for {min} minutes as --ART_MBP:{r[i][0]} --MAC:{r[i][1]:.1f} --BIS:{r[i][2]}")
+               
