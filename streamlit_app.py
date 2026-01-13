@@ -465,7 +465,7 @@ def process_trans_cls(win, inp):
     for t in min_list:
         ckpt_path = os.path.join(
             'checkpoint',
-            f'trans-cls-{win}',
+            f'trans-res-{win}',
             f'{t}min',
             'best_fold1.pth'
         )
